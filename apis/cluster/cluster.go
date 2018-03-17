@@ -29,6 +29,7 @@ const (
 	CloudGoogle       = "google"
 	CloudBaremetal    = "baremetal"
 	CloudDigitalOcean = "digitalocean"
+	CloudLinode       = "linode"
 	CloudOVH          = "ovh"
 	CloudPacket       = "packet"
 	CloudECS          = "ecs"

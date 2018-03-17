@@ -22,6 +22,7 @@ import (
 	"github.com/kubicorn/kubicorn/profiles/azure"
 	"github.com/kubicorn/kubicorn/profiles/digitalocean"
 	"github.com/kubicorn/kubicorn/profiles/googlecompute"
+	"github.com/kubicorn/kubicorn/profiles/linode"
 	"github.com/kubicorn/kubicorn/profiles/openstack/ecs"
 	"github.com/kubicorn/kubicorn/profiles/openstack/ovh"
 	"github.com/kubicorn/kubicorn/profiles/packet"
@@ -144,6 +145,22 @@ var ProfileMapIndexed = map[string]ProfileMap{
 	"aws-debian": {
 		ProfileFunc: amazon.NewDebianCluster,
 		Description: "Debian on Amazon",
+	},
+	"linode": {
+		ProfileFunc: linode.NewUbuntuCluster,
+		Description: "Ubuntu on Linode",
+	},
+	"linode-ubuntu": {
+		ProfileFunc: linode.NewUbuntuCluster,
+		Description: "Ubuntu on Linode",
+	},
+	"linode-debian": {
+		ProfileFunc: linode.NewDebianCluster,
+		Description: "Debian on Linode",
+	},
+	"linode-centos": {
+		ProfileFunc: linode.NewCentosCluster,
+		Description: "Centos on Linode",
 	},
 	"ovh": {
 		ProfileFunc: ovh.NewUbuntuCluster,

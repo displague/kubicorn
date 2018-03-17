@@ -31,6 +31,9 @@ import (
 	"github.com/kubicorn/kubicorn/cloud/google/compute"
 	gr "github.com/kubicorn/kubicorn/cloud/google/compute/resources"
 	"github.com/kubicorn/kubicorn/cloud/google/googleSDK"
+	"github.com/kubicorn/kubicorn/cloud/linode/golinodeSdk"
+	"github.com/kubicorn/kubicorn/cloud/linode/linode"
+	lr "github.com/kubicorn/kubicorn/cloud/linode/linode/resources"
 	"github.com/kubicorn/kubicorn/cloud/openstack/openstackSdk"
 	osecs "github.com/kubicorn/kubicorn/cloud/openstack/operator/ecs"
 	osr "github.com/kubicorn/kubicorn/cloud/openstack/operator/generic/resources"
@@ -82,6 +85,13 @@ func GetReconciler(known *cluster.Cluster, runtimeParameters *RuntimeParameters)
 		}
 		azr.Sdk = sdk
 		return cloud.NewAtomicReconciler(known, azpub.NewAzurePublicModel(known)), nil
+	case cluster.CloudLinode:
+		sdk, err := golinodeSdk.NewSdk()
+		if err != nil {
+			return nil, err
+		}
+		lr.Sdk = sdk
+		return cloud.NewAtomicReconciler(known, linode.NewLinodeInstanceModel(known)), nil
 	case cluster.CloudOVH:
 		sdk, err := openstackSdk.NewSdk(known.ProviderConfig().Location)
 		if err != nil {
