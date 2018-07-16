@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/chiefy/go-linode"
+	"github.com/chiefy/linodego"
 )
 
 type Sdk struct {
-	Client *golinode.Client
+	Client *linodego.Client
 }
 
 func NewSdk() (*Sdk, error) {
@@ -30,19 +30,15 @@ func NewSdk() (*Sdk, error) {
 	pat := GetToken()
 
 	if pat == "" {
-		return nil, fmt.Errorf("Empty $LINODE_ACCESS_TOKEN")
+		return nil, fmt.Errorf("Empty $LINODE_TOKEN")
 	}
 
-	client, err := golinode.NewClient(&pat, nil)
+	client := linodego.NewClient(&pat, nil)
 
-	if err != nil {
-		return nil, fmt.Errorf("Could not create Linode Client")
-	}
-
-	sdk.Client = client
+	sdk.Client = &client
 	return sdk, nil
 }
 
 func GetToken() string {
-	return os.Getenv("LINODE_ACCESS_TOKEN")
+	return os.Getenv("LINODE_TOKEN")
 }

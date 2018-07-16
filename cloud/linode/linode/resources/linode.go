@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chiefy/go-linode"
+	"github.com/chiefy/linodego"
 	"github.com/kris-nova/klone/pkg/local"
 	"github.com/kubicorn/kubicorn/apis/cluster"
 	"github.com/kubicorn/kubicorn/cloud"
@@ -37,7 +37,7 @@ var _ cloud.Resource = &Linode{}
 type Linode struct {
 	Shared
 	Region           string
-	Size             string
+	Type             string
 	Image            string
 	Count            int
 	SSHFingerprint   string
@@ -52,6 +52,7 @@ const (
 	DeleteSleepSecondsPerAttempt   = 3
 )
 
+// Actual will return the current existing resource in the cloud if it exists.
 func (r *Linode) Actual(immutable *cluster.Cluster) (*cluster.Cluster, cloud.Resource, error) {
 	logger.Debug("linode.Actual")
 	newResource := &Linode{
@@ -61,7 +62,8 @@ func (r *Linode) Actual(immutable *cluster.Cluster) (*cluster.Cluster, cloud.Res
 		},
 	}
 
-	linodes, _, err := Sdk.Client.Linode.ListInstances(context.TODO(), r.Name, &golinode.ListOptions{})
+	listFilter := fmt.Sprintf("{\"label\":\"%s\"}", r.Name)
+	linodes, err := Sdk.Client.ListInstances(&linodego.ListOptions{PageOptions: nil, Filter: listFilter})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,13 +72,13 @@ func (r *Linode) Actual(immutable *cluster.Cluster) (*cluster.Cluster, cloud.Res
 		newResource.Count = len(linodes)
 
 		// Todo (@kris-nova) once we start to test these implementations we really need to work on the linode logic. Right now we just pick the first one..
-		linode := droplets[0]
+		linode := linodes[0]
 		id := strconv.Itoa(linode.ID)
-		newResource.Name = linode.Name
+		newResource.Name = linode.Label
 		newResource.CloudID = id
-		newResource.Size = linode.Size.Slug
-		newResource.Image = linode.Image.Slug
-		newResource.Region = linode.Region.Id
+		newResource.Type = linode.Type
+		newResource.Image = linode.Image
+		newResource.Region = linode.Region
 	}
 	newResource.BootstrapScripts = r.ServerPool.BootstrapScripts
 	newResource.SSHFingerprint = immutable.ProviderConfig().SSH.PublicKeyFingerprint
@@ -89,6 +91,7 @@ func (r *Linode) Actual(immutable *cluster.Cluster) (*cluster.Cluster, cloud.Res
 	return newCluster, newResource, nil
 }
 
+// Expected will return the anticipated cloud resource.
 func (r *Linode) Expected(immutable *cluster.Cluster) (*cluster.Cluster, cloud.Resource, error) {
 	logger.Debug("linode.Expected")
 	newResource := &Linode{
@@ -108,6 +111,7 @@ func (r *Linode) Expected(immutable *cluster.Cluster) (*cluster.Cluster, cloud.R
 	return newCluster, newResource, nil
 }
 
+// Apply will create a cloud resource if needed.
 func (r *Linode) Apply(actual, expected cloud.Resource, immutable *cluster.Cluster) (*cluster.Cluster, cloud.Resource, error) {
 	logger.Debug("linode.Apply")
 	applyResource := expected.(*Linode)
@@ -259,6 +263,8 @@ func (r *Linode) Apply(actual, expected cloud.Resource, immutable *cluster.Clust
 	newCluster := r.immutableRender(newResource, immutable)
 	return newCluster, newResource, nil
 }
+
+// Delete will delete a cloud resource if needed.
 func (r *Linode) Delete(actual cloud.Resource, immutable *cluster.Cluster) (*cluster.Cluster, cloud.Resource, error) {
 	logger.Debug("linode.Delete")
 	deleteResource := actual.(*Linode)

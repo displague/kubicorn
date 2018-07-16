@@ -20,16 +20,16 @@ import (
 )
 
 var (
-	LinodeAccessToken = os.Getenv("LINODE_ACCESS_TOKEN")
+	LinodeAccessToken = os.Getenv("LINODE_TOKEN")
 )
 
 func TestMain(m *testing.M) {
 	m.Run()
-	os.Setenv("LINODE_ACCESS_TOKEN", LinodeAccessToken)
+	os.Setenv("LINODE_TOKEN", LinodeAccessToken)
 }
 
 func TestSdkHappy(t *testing.T) {
-	os.Setenv("LINODE_ACCESS_TOKEN", "123")
+	os.Setenv("LINODE_TOKEN", "123")
 	_, err := NewSdk()
 	if err != nil {
 		t.Fatalf("Unable to get Linode SDK: %v", err)
@@ -37,7 +37,7 @@ func TestSdkHappy(t *testing.T) {
 }
 
 func TestSdkSad(t *testing.T) {
-	os.Setenv("LINODE_ACCESS_TOKEN", "")
+	os.Setenv("LINODE_TOKEN", "")
 	_, err := NewSdk()
 	if err == nil {
 		t.Fatalf("Able to get Linode SDK with empty variables")
